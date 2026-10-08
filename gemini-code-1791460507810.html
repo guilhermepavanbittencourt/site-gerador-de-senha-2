@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Senhas Legíveis (Leetspeak)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        button {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #passwordOutput {
+            user-select: all;
+            -webkit-user-select: all;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #020617;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center p-4">
+
+    <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6 sm:p-8">
+        
+        <!-- Cabeçalho -->
+        <div class="text-center mb-6">
+            <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-400 mb-3 text-xl">
+                <i class="fa-solid fa-shield-cat"></i>
+            </div>
+            <h1 class="text-2xl font-bold tracking-tight">Senha Legível</h1>
+            <p class="text-sm text-slate-400 mt-1">Transforme palavras fáceis em senhas seguras e válidas.</p>
+        </div>
+
+        <!-- Exibição da Senha Gerada -->
+        <div class="relative bg-slate-950 border border-slate-800 rounded-xl p-4 mb-6 flex items-center justify-between">
+            <span id="passwordOutput" class="text-xl sm:text-2xl font-mono text-indigo-400 tracking-wider truncate mr-2 select-all">Clique em Gerar</span>
+            <button onclick="copyPassword()" class="bg-indigo-600 hover:bg-indigo-500 text-white p-2.5 rounded-lg transition-all flex-shrink-0 active:scale-95" title="Copiar senha">
+                <i id="copyIcon" class="fa-regular fa-copy"></i>
+            </button>
+        </div>
+
+        <!-- Controles de Personalização -->
+        <div class="space-y-4 mb-6">
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Palavra Base (Opcional)</label>
+                <input type="text" id="baseWordInput" placeholder="Deixe em branco para palavra aleatória" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 pt-2">
+                <label class="flex items-center space-x-2 text-sm text-slate-300 cursor-pointer select-none">
+                    <input type="checkbox" id="addSymbols" checked class="rounded bg-slate-950 border-slate-700 text-indigo-600 focus:ring-0">
+                    <span>Adicionar Símbolos</span>
+                </label>
+                <label class="flex items-center space-x-2 text-sm text-slate-300 cursor-pointer select-none">
+                    <input type="checkbox" id="addNumbers" checked class="rounded bg-slate-950 border-slate-700 text-indigo-600 focus:ring-0">
+                    <span>Misturar Números</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Botão de Gerar -->
+        <button onclick="generatePassword()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl transition-all shadow-lg shadow-indigo-600/20 active:scale-98 flex items-center justify-center space-x-2">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span>Gerar Senha Inteligente</span>
+        </button>
+
+        <!-- Informações de Segurança -->
+        <div class="mt-6 pt-6 border-t border-slate-800 text-xs text-slate-500 flex justify-between items-center">
+            <span>Segurança: <strong id="strengthText" class="text-amber-400">Média</strong></span>
+            <span>Fácil de memorizar</span>
+        </div>
+
+    </div>
+
+    <!-- Lógica JavaScript -->
+    <script>
+        const wordList = [
+            "computador", "seguranca", "programa", "internet", "desenvolvedor", 
+            "tecnologia", "sistema", "conexao", "janela", "teclado", 
+            "monitor", "guerreiro", "passaro", "planeta", "floresta",
+            "oceano", "horizonte", "diamante", "foguete", "girassol"
+        ];
+
+        const symbols = ["!", "@", "#", "$", "%", "&", "*", "_", "-"];
+
+        function applyLeetspeak(word) {
+            const map = {
+                'a': '@', 'A': '4',
+                'e': '3', 'E': '3',
+                'i': '1', 'I': '1',
+                'o': '0', 'O': '0',
+                's': '$', 'S': '5',
+                't': '7', 'T': '7'
+            };
+
+            return word.split('').map(char => {
+                if (map[char] && Math.random() < 0.7) {
+                    return map[char];
+                }
+                return char;
+            }).join('');
+        }
+
+        function generatePassword() {
+            let inputWord = document.getElementById('baseWordInput').value.trim();
+            const useSymbols = document.getElementById('addSymbols').checked;
+            const useNumbers = document.getElementById('addNumbers').checked;
+
+            if (!inputWord) {
+                inputWord = wordList[Math.floor(Math.random() * wordList.length)];
+            }
+
+            let processed = inputWord.charAt(0).toUpperCase() + inputWord.slice(1);
+
+            processed = applyLeetspeak(processed);
+
+            if (useNumbers && !/\d/.test(processed)) {
+                const randomNum = Math.floor(Math.random() * 90) + 10;
+                processed += randomNum;
+            }
+
+            if (useSymbols) {
+                const prefixSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+                const suffixSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+                processed = prefixSymbol + processed + suffixSymbol;
+            }
+
+            document.getElementById('passwordOutput').innerText = processed;
+            
+            updateStrengthIndicator(processed);
+        }
+
+        function updateStrengthIndicator(pwd) {
+            const strengthEl = document.getElementById('strengthText');
+            if (pwd.length > 10 && /[!@#$%&*_\-]/.test(pwd) && /\d/.test(pwd)) {
+                strengthEl.innerText = "Forte";
+                strengthEl.className = "text-emerald-400 font-bold";
+            } else if (pwd.length > 6) {
+                strengthEl.innerText = "Boa";
+                strengthEl.className = "text-indigo-400 font-bold";
+            } else {
+                strengthEl.innerText = "Média";
+                strengthEl.className = "text-amber-400 font-bold";
+            }
+        }
+
+        async function copyPassword() {
+            const passwordText = document.getElementById('passwordOutput').innerText;
+            if (passwordText === "Clique em Gerar") return;
+
+            try {
+                await navigator.clipboard.writeText(passwordText);
+                const copyIcon = document.getElementById('copyIcon');
+                copyIcon.className = "fa-solid fa-check text-emerald-400";
+                
+                setTimeout(() => {
+                    copyIcon.className = "fa-regular fa-copy";
+                }, 2000);
+            } catch (err) {
+                console.error("Erro ao copiar senha:", err);
+            }
+        }
+
+        window.onload = generatePassword;
+    </script>
+</body>
+</html>
